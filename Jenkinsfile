@@ -34,7 +34,8 @@ pipeline {
                 }
                 sh '''
                     echo "Building all Docker images using docker compose..."
-                    docker compose build --no-cache
+                    echo "Note: Using Docker cache for faster builds. Use --no-cache if you need a clean build."
+                    docker compose build
                     echo "Build completed successfully!"
                     echo ""
                     echo "Built images:"
@@ -193,12 +194,16 @@ pipeline {
                     echo '========================================'
                 }
                 sh '''
-                    echo "Stopping any existing containers..."
-                    docker compose down || true
+                    echo "Stopping and removing any existing containers..."
+                    docker compose down --remove-orphans || true
+                    
+                    # Force remove containers if they still exist (from other compose projects)
+                    echo "Cleaning up any remaining containers with same names..."
+                    docker rm -f mongodb api-service auth-service frontend nginx jenkins 2>/dev/null || true
                     
                     echo ""
                     echo "Starting full application stack..."
-                    docker compose up -d
+                    docker compose up -d --remove-orphans
                     
                     echo ""
                     echo "Waiting for services to be healthy..."
