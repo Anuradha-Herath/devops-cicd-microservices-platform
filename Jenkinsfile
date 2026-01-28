@@ -164,20 +164,24 @@ pipeline {
                     # Check if Trivy is available
                     if command -v trivy &> /dev/null; then
                         echo "Running Trivy security scan on Docker images..."
+                        echo "Note: Scanning already-built images without rebuilding to avoid disrupting running services"
+                        
+                        # Use image names with project prefix
                         echo "Scanning api-service image..."
-                        docker compose build api-service --quiet
-                        trivy image --exit-code 0 --severity HIGH,CRITICAL api-service:latest || echo "⚠ Security scan completed with findings (non-blocking)"
+                        trivy image --exit-code 0 --severity HIGH,CRITICAL devops-cicd-api-service:latest 2>/dev/null || echo "⚠ Security scan completed with findings (non-blocking)"
                         
                         echo "Scanning auth-service image..."
-                        docker compose build auth-service --quiet
-                        trivy image --exit-code 0 --severity HIGH,CRITICAL auth-service:latest || echo "⚠ Security scan completed with findings (non-blocking)"
+                        trivy image --exit-code 0 --severity HIGH,CRITICAL devops-cicd-auth-service:latest 2>/dev/null || echo "⚠ Security scan completed with findings (non-blocking)"
                         
                         echo "Scanning frontend image..."
-                        docker compose build frontend --quiet
-                        trivy image --exit-code 0 --severity HIGH,CRITICAL frontend:latest || echo "⚠ Security scan completed with findings (non-blocking)"
+                        trivy image --exit-code 0 --severity HIGH,CRITICAL devops-cicd-frontend:latest 2>/dev/null || echo "⚠ Security scan completed with findings (non-blocking)"
+                        
+                        echo "Scanning nginx image..."
+                        trivy image --exit-code 0 --severity HIGH,CRITICAL devops-cicd-nginx:latest 2>/dev/null || echo "⚠ Security scan completed with findings (non-blocking)"
                     else
                         echo "⚠ Trivy scanner not available (skipping security scan)"
                         echo "To enable security scanning, install Trivy in the Jenkins container"
+                        echo "This stage is non-blocking and will not affect deployment"
                     fi
                     
                     echo ""
