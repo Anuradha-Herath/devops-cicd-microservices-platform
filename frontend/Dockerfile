@@ -12,7 +12,7 @@ COPY next.config.js ./
 # Install dependencies with BuildKit cache mount for faster builds
 # This caches npm's package cache between builds (speeds up downloads)
 RUN --mount=type=cache,target=/root/.npm \
-    npm install --prefer-offline --no-audit
+    npm install --prefer-offline --no-audit --progress=false
 
 # Copy source code
 COPY . .

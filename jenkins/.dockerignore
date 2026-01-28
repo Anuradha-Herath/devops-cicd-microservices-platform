@@ -1,0 +1,4 @@
+# Jenkins .dockerignore
+*.md
+.git
+.gitignore
